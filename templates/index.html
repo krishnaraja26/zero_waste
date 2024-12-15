@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detectly</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b); /* Warm dual gradient */
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite; /* Parallax animation */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #ffffff;
+            cursor: url('https://cdn.jsdelivr.net/gh/wilfredig/curious-cursors@latest/cursors/arrow/arrow1.png'), auto; /* Interactive cursor */
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes floatingEffect {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            color: #f5f5f5;
+            animation: floatingEffect 2s ease-in-out infinite; /* Floating animation */
+        }
+
+        /* Glassmorphic Card */
+        .glass-card {
+            background: rgba(0, 0, 0, 0.4); /* Darker and more contrasting background */
+            border-radius: 12px;
+            box-shadow: 0 4px 40px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            width: 90%;
+            max-width: 750px;
+            margin: 0 auto;
+            animation: floatingEffect 3s ease-in-out infinite; /* Floating animation */
+        }
+
+        /* Upload Form */
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        input[type="file"] {
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #feb47b;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s ease; /* Smooth shadow hover effect */
+            cursor: pointer;
+        }
+        input[type="file"]:hover, input[type="file"]:focus {
+            border-color: #ff7e5f;
+            box-shadow: 0 0 10px 5px rgba(255, 165, 0, 0.8); /* Smooth shadow hover effect */
+        }
+        button {
+            background-color: #ff7e5f;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #feb47b;
+        }
+
+        /* Toggle Switch */
+        .toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .toggle input {
+            width: 50px;
+            height: 25px;
+            appearance: none;
+            background: #ddd;
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+            outline: none;
+        }
+        .toggle input:checked {
+            background: #ff7e5f;
+        }
+        .toggle input::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: #ffffff;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+        .toggle input:checked::after {
+            left: 25px;
+        }
+
+        /* Prediction Results */
+        .result-container {
+            display: none;
+            margin-top: 30px;
+        }
+
+        /* Prediction Cards - Card hover with zoom effect */
+        .class-card {
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Card hover with zoom effect */
+        }
+        .class-card:hover {
+            transform: scale(1.05); /* Zoom effect */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 15px;
+            border-radius: 8px;
+        }
+        .class-details {
+            display: none;
+        }
+
+        /* Hoverable annotations */
+        .annotation {
+            position: absolute;
+            border: 2px solid #00ff00;
+            background-color: rgba(0, 255, 0, 0.4);
+            color: white;
+            font-size: 14px;
+            padding: 5px 8px;
+            border-radius: 5px;
+            pointer-events: none;
+            display: none;
+        }
+        .image-container {
+            position: relative;
+        }
+        .image-container:hover .annotation {
+            display: block;
+        }
+
+        /* Toggle class details */
+        .class-toggle:checked + .class-details {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-card">
+        <h1>Detectly</h1>
+
+        <!-- Upload Form -->
+        <form id="upload-form" action="/predict" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept="image/*" required />
+            <button type="submit">📤</button> <!-- Symbol for Upload -->
+        </form>
+
+        <!-- Toggle for uploaded image -->
+        <div class="toggle">
+            <label for="toggle-uploaded-image">Show Uploaded Image</label>
+            <input type="checkbox" id="toggle-uploaded-image">
+        </div>
+
+        <!-- Results Container -->
+        <div class="result-container" id="result-container">
+            <div id="image-container" class="image-container" style="display: none;">
+                <img id="uploaded-image" alt="Uploaded Image" />
+                <div id="annotations"></div>
+            </div>
+            <div id="predictions"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById("upload-form");
+        const toggleUploadedImage = document.getElementById("toggle-uploaded-image");
+        const uploadedImage = document.getElementById("uploaded-image");
+        const resultContainer = document.getElementById("result-container");
+        const predictionsContainer = document.getElementById("predictions");
+        const imageContainer = document.getElementById("image-container");
+        const annotationsContainer = document.getElementById("annotations");
+
+        toggleUploadedImage.addEventListener("change", () => {
+            uploadedImage.style.display = toggleUploadedImage.checked ? "block" : "none";
+        });
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            // Clear previous results
+            resultContainer.style.display = "none";
+            predictionsContainer.innerHTML = "";
+            uploadedImage.style.display = "none";
+            toggleUploadedImage.checked = false;
+            annotationsContainer.innerHTML = "";
+            imageContainer.style.display = "none";
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch("/predict", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    uploadedImage.src = data.image_path;
+                    resultContainer.style.display = "block";
+                    imageContainer.style.display = "block";
+
+                    // Render prediction cards
+                    data.annotated_images.forEach((prediction) => {
+                        const classCard = document.createElement("div");
+                        classCard.className = "class-card";
+
+                        classCard.innerHTML = `
+                            <p><strong>Class:</strong> ${prediction.class_name}</p>
+                            <div class="toggle">
+                                <label>Show Details</label>
+                                <input type="checkbox" class="class-toggle" data-class="${prediction.class_name}">
+                            </div>
+                            <div class="class-details" id="details-${prediction.class_name}">
+                                <p><strong>Confidence:</strong> ${(prediction.confidence * 100).toFixed(2)}%</p>
+                                <img src="${prediction.image_path}" alt="${prediction.class_name}">
+                            </div>
+                        `;
+
+                        predictionsContainer.appendChild(classCard);
+
+                        const toggle = classCard.querySelector(".class-toggle");
+                        const details = classCard.querySelector(`#details-${prediction.class_name}`);
+                        toggle.addEventListener("change", () => {
+                            details.style.display = toggle.checked ? "block" : "none";
+                        });
+
+                        // Create hoverable annotations
+                        prediction.annotations.forEach(annotation => {
+                            const annotationElement = document.createElement("div");
+                            annotationElement.className = "annotation";
+                            annotationElement.style.left = `${annotation.x1}px`;
+                            annotationElement.style.top = `${annotation.y1}px`;
+                            annotationElement.style.width = `${annotation.x2 - annotation.x1}px`;
+                            annotationElement.style.height = `${annotation.y2 - annotation.y1}px`;
+                            annotationElement.textContent = annotation.label;
+
+                            annotationsContainer.appendChild(annotationElement);
+                        });
+                    });
+                } else {
+                    throw new Error(data.error || "An error occurred during prediction.");
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+    </script>
+</body>
+</html>
