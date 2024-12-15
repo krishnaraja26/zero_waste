@@ -1,0 +1,29 @@
+# zero_waste
+
+code for dataset:
+
+!pip install roboflow
+from roboflow import Roboflow
+rf = Roboflow(api_key="phqkUk0NhZbqLvxOHMF0")
+project = rf.workspace("object-detection-oc0zz").project("taco-dataset-nzu6o")
+version = project.version(1)
+dataset = version.download("yolov8")
+
+detectly home page
+
+![WhatsApp Image 2024-12-12 at 14 00 42_c10b9f75](https://github.com/user-attachments/assets/074e4e8d-6fcc-4dac-bdc1-2612446d4ab7)
+
+Results after uploading the image
+
+![WhatsApp Image 2024-12-12 at 14 01 21_e98e7aa2](https://github.com/user-attachments/assets/632554eb-e59c-4ee8-a70b-bbf7e456f3e4)
+
+
+Results for single class:
+
+![WhatsApp Image 2024-12-12 at 14 01 44_01b6059f](https://github.com/user-attachments/assets/f693d205-4c01-4c31-b88e-5f8f9b92756a)
+
+
+
+
+
+
